@@ -1,0 +1,2 @@
+pydns==2.3.6
+validate-email==1.3
