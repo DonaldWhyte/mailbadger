@@ -30,7 +30,7 @@ def main(args):
                                              args.verbose)
     # Output found addresses
     for addr in addresses:
-        print addresses
+        print addr
 
 if __name__ == '__main__':
     parser = get_argument_parser()
