@@ -30,11 +30,15 @@ def _validate(addr, verbose=False):
 
 class AddressValidator:
 
-    def __init__(self, numProcesses):
+    def __init__(self, num_processes):
+        self._num_processes = num_processes
+        self._create_pool()
+
+    def _create_pool(self):
         # Make the process ignore SIGINT before a process Pool is created. This
         # way created child processes inherit SIGINT handler.
         original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
-        self.proc_pool = Pool(numProcesses)
+        self.proc_pool = Pool(self._num_processes)
         # Restore the original SIGINT handler in the parent process after a Pool
         # has been created.
         signal.signal(signal.SIGINT, original_sigint_handler)
@@ -55,14 +59,23 @@ class AddressValidator:
         # Use `map_async()` so we can gracefully handle keyboard interrupts.
         # We want the interrupt to terminal *all* child processes, which won't
         # happen with the blocking `map()` call.
+        pool_is_terminated = False
+        interrupt_to_raise = None
         try:
             async_results = self.proc_pool.map_async(validate_func, addresses)
             results = async_results.get(TIMEOUT) # need timeout for interrupt to work
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as e:
             self.proc_pool.terminate()
-        else:
-            self.proc_pool.close()
+            interrupt_to_raise = e
         self.proc_pool.join()
+
+        # Recreate the process pool if it was terminated by keyboard interrupt,\
+        # then continue bubbling the interrupt upwards. Yes, this is hacky.
+        # Yes, I feel dirty. But gracefully handling keyboard interrupts is
+        # important
+        if interrupt_to_raise:
+            self._create_pool()
+            raise e
 
         # only return addresses which exist
         return [ res[0] for res in results if res[1] ]
