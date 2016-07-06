@@ -1,4 +1,4 @@
-#!/usr/bin/python
+"""Contains entrypoint logic for running mailbadger as a script."""
 
 from email_finder.address_validator import AddressValidator
 from email_finder.address_guesser import get_possible_addresses_for
@@ -33,8 +33,3 @@ def main(args):
         print '\nFound address:'
     for addr in addresses:
         print addr
-
-if __name__ == '__main__':
-    parser = get_argument_parser()
-    args = parser.parse_args()
-    main(args)
