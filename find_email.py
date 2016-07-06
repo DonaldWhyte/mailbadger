@@ -11,9 +11,9 @@ def get_argument_parser():
     parser.add_argument('second_name', type=str, help='second name of person')
     parser.add_argument('domain', type=str, help='domain of email server to search')
     parser.add_argument('--verbose', action='store_true', help="enable verbose output")
-    parser.add_argument('--maxNumberToTry', type=int, default=10,
+    parser.add_argument('--maxNumberToTry', type=int, default=1,
                         help='max number to append to candidate email')
-    parser.add_argument('--numProcesses', type=int, default=10,
+    parser.add_argument('--numProcesses', type=int, default=4,
                         help='number of processes to spawn for validating emails in parallel')
 
     return parser
@@ -29,6 +29,8 @@ def main(args):
                                              args.domain,
                                              args.verbose)
     # Output found addresses
+    if args.verbose:
+        print '\nFound address:'
     for addr in addresses:
         print addr
 

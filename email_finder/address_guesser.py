@@ -1,14 +1,15 @@
 NAME_COMBINATIONS = [ '{}{}', '{}.{}' ]
 
 def _get_numbered_emails(root, max_num):
-    return [ '{:s}{:d}'.format(root, i) for i in range(max_num + 1) ]
+    numbered_emails = [ '{:s}{:d}'.format(root, i) for i in range(max_num + 1) ]
+    return [ root ] + numbered_emails # also add root w/o number
 
 def _get_full_name_emails(first_name, second_name, max_num_to_try_per_combo):
     roots = [
         (first_name, second_name),
         (first_name[:1], second_name),
         (first_name, second_name[:1]),
-        (first_name[:1], second_name[:1])
+        #(first_name[:1], second_name[:1]) # TODO: even have this?
     ]
     # Add lowercase variants for each root
     lower_case_roots = [ (r[0].lower(), r[1].lower()) for r in roots ]

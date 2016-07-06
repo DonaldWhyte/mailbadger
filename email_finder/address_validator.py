@@ -1,7 +1,6 @@
 from validate_email import validate_email
 from DNS.Base import TimeoutError
 from multiprocessing import Pool
-import logging
 from functools import partial
 import signal
 
@@ -21,60 +20,60 @@ def _validate(addr, verbose=False):
             result = False
         return (addr, result)
     except TimeoutError as e:
-        msg = 'Timed out validating {email}'.format(email=addr)
         if verbose:
-            print msg
-        logging.info(msg)
-
+            print 'Timed out validating {email}'.format(email=addr)
         return (addr, False)
 
 class AddressValidator:
 
     def __init__(self, num_processes):
         self._num_processes = num_processes
-        self._create_pool()
 
     def _create_pool(self):
         # Make the process ignore SIGINT before a process Pool is created. This
         # way created child processes inherit SIGINT handler.
         original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
-        self.proc_pool = Pool(self._num_processes)
+        proc_pool = Pool(self._num_processes)
         # Restore the original SIGINT handler in the parent process after a Pool
         # has been created.
         signal.signal(signal.SIGINT, original_sigint_handler)
 
-    def validate_addresses(self, addresses, domain, verbose=False):
+        return proc_pool
+
+    def _domain_has_email_server(self, domain):
         # ensure domain has a detectable SMTP server before doing anything
-        if not validate_email('test@{domain}'.format(domain=domain), check_mx=True):
-            msg = 'Cannot detect mail server at "{domain}"'.format(domain=domain)
+        return validate_email(
+            'test@{domain}'.format(domain=domain), check_mx=True)
+
+    def validate_addresses(self, addresses, domain, verbose=False):
+        if not self._domain_has_email_server(domain):
             if verbose:
-                print msg
-            logging.info(msg)
+                print 'Cannot detect mail server at "{domain}"'.format(domain)
             return []
 
-        # validate the specified addresses exist on the specified domain
+        # Validate the specified addresses exist on the specified domain
         addresses = [ '{:s}@{:s}'.format(addr, domain) for addr in addresses ]
         validate_func = partial(_validate, verbose=verbose)
 
         # Use `map_async()` so we can gracefully handle keyboard interrupts.
         # We want the interrupt to terminal *all* child processes, which won't
         # happen with the blocking `map()` call.
-        pool_is_terminated = False
+        #
+        # TODO: handle interrupts gracefully *and* don't recreate it every call.
+        pool = self._create_pool()
         interrupt_to_raise = None
         try:
-            async_results = self.proc_pool.map_async(validate_func, addresses)
+            async_results = pool.map_async(validate_func, addresses)
             results = async_results.get(TIMEOUT) # need timeout for interrupt to work
         except KeyboardInterrupt as e:
-            self.proc_pool.terminate()
+            pool.terminate()
             interrupt_to_raise = e
-        self.proc_pool.join()
+        else:
+            pool.close()
+        pool.join()
 
-        # Recreate the process pool if it was terminated by keyboard interrupt,\
-        # then continue bubbling the interrupt upwards. Yes, this is hacky.
-        # Yes, I feel dirty. But gracefully handling keyboard interrupts is
-        # important
+        # Continue bubbling the interrupt upwards.
         if interrupt_to_raise:
-            self._create_pool()
             raise e
 
         # only return addresses which exist
