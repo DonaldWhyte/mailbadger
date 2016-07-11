@@ -38,6 +38,6 @@ def main(args):
                                              args.verbose)
     # Output found addresses
     if args.verbose:
-        print '\nFound address:'
+        print '\nFound addresses:'
     for addr in addresses:
         print addr

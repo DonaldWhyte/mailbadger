@@ -6,7 +6,8 @@ import signal
 
 TIMEOUT = 999999999
 
-OBVIOUSLY_FAKE_EMAILS = [
+OBVIOUSLY_FAKE_ADDRESSES = [
+    'poo.thisisfake'
     'agh12345djfj',
     'zvngh99fla',
     'bogardcaof',
@@ -68,10 +69,13 @@ class AddressValidator:
         if verbose:
             print 'Ensuring mail sever does not state every email address exists'
 
-        fakeEmailExistences = [
-            _validate(email, verbose=verbose) for email in OBVIOUSLY_FAKE_EMAILS
+        fakeEmails = [
+            '{:s}@{:s}'.format(addr, domain) for addr in OBVIOUSLY_FAKE_ADDRESSES
         ]
-        if all(exists == True for exists in fakeEmailExistences):
+        fakeEmailExistences = [
+            _validate(email, verbose=verbose) for email in fakeEmails
+        ]
+        if all(exists[1] == True for exists in fakeEmailExistences):
             if verbose:
                 msg = 'Mail server at {domain} said all fake dummy addresses'
                 msg += ' exist, cannot use it for validating addresses'
