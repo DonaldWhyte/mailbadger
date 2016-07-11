@@ -6,6 +6,15 @@ import signal
 
 TIMEOUT = 999999999
 
+OBVIOUSLY_FAKE_EMAILS = [
+    'agh12345djfj',
+    'zvngh99fla',
+    'bogardcaof',
+    '975489qyewof9y__esr78ye4847t____',
+    '1234567wgjskxSNFJBGvje5___________SSSAJWNN',
+    'foofoofoofoofoofoofooBLAHBLAHBLAHhahahah2742'
+]
+
 def _validate(addr, verbose=False):
     try:
         result = validate_email(addr, verify=True)
@@ -45,10 +54,34 @@ class AddressValidator:
         return validate_email(
             'test@{domain}'.format(domain=domain), check_mx=True)
 
-    def validate_addresses(self, addresses, domain, verbose=False):
+    def validate_email_server(self, domain, verbose=False):
         if not self._domain_has_email_server(domain):
             if verbose:
-                print 'Cannot detect mail server at "{domain}"'.format(domain)
+                msg = 'Cannot detect mail server at "{domain}"'
+                print msg.format(domain=domain)
+            return False
+
+        # Some mail servers always say every email you request exists. To
+        # prevent those servers misleading users, we consider the mail server
+        # invalid if they say every email address from a collection of obviously
+        # fake addresses exist.
+        if verbose:
+            print 'Ensuring mail sever does not state every email address exists'
+
+        fakeEmailExistences = [
+            _validate(email, verbose=verbose) for email in OBVIOUSLY_FAKE_EMAILS
+        ]
+        if all(exists == True for exists in fakeEmailExistences):
+            if verbose:
+                msg = 'Mail server at {domain} said all fake dummy addresses'
+                msg += ' exist, cannot use it for validating addresses'
+                print msg.format(domain=domain)
+            return False
+
+        return True
+
+    def validate_addresses(self, addresses, domain, verbose=False):
+        if not self.validate_email_server(domain, verbose):
             return []
 
         # Validate the specified addresses exist on the specified domain
