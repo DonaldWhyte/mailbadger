@@ -31,6 +31,10 @@ def main(args):
     candidate_addresses = get_possible_addresses_for(args.first_name,
                                                      args.second_name,
                                                      args.maxNumberToTry)
+    # Also force names to be all lowercase and try those combinations too
+    candidate_addresses += get_possible_addresses_for(args.first_name.lower(),
+                                                      args.second_name.lower(),
+                                                      args.maxNumberToTry)
     # Validate candidate emails by checking if they exist on target email server
     validator = AddressValidator(args.numProcesses)
     addresses = validator.validate_addresses(candidate_addresses,
