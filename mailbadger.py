@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 """Python script installed with setup.py to run mailbadger script."""
 

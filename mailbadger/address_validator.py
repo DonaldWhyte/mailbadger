@@ -6,7 +6,8 @@ import logging
 
 TIMEOUT = 999999999
 
-def validate_wrapper((validator, address, domain)):
+def validate_wrapper(args):
+    validator, address, domain = args
     return (address, validator.validate(address, domain))
 
 class AddressValidator:

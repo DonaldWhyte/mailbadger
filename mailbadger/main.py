@@ -42,6 +42,6 @@ def main(args):
     addresses = validator.validate_addresses(candidate_addresses, args.domain)
     # Output found addresses
     if args.verbose:
-        print '\nFound addresses:'
+        print('\nFound addresses:')
     for addr in addresses:
-        print addr
+        print(addr)
