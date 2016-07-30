@@ -1,5 +1,6 @@
 """Contains entrypoint logic for running mailbadger as a script."""
 
+from mailbadger.mail_server_validator import MailServerValidator
 from mailbadger.address_validator import AddressValidator
 from mailbadger.address_guesser import get_possible_addresses_for
 import argparse
@@ -32,14 +33,13 @@ def main(args):
                                                      args.second_name,
                                                      args.maxNumberToTry)
     # Also force names to be all lowercase and try those combinations too
-    candidate_addresses += get_possible_addresses_for(args.first_name.lower(),
-                                                      args.second_name.lower(),
-                                                      args.maxNumberToTry)
+    candidate_addresses.union(get_possible_addresses_for(args.first_name.lower(),
+                                                         args.second_name.lower(),
+                                                         args.maxNumberToTry))
     # Validate candidate emails by checking if they exist on target email server
-    validator = AddressValidator(args.numProcesses)
-    addresses = validator.validate_addresses(candidate_addresses,
-                                             args.domain,
-                                             args.verbose)
+    underlying_validator = MailServerValidator()
+    validator = AddressValidator(underlying_validator, args.numProcesses)
+    addresses = validator.validate_addresses(candidate_addresses, args.domain)
     # Output found addresses
     if args.verbose:
         print '\nFound addresses:'
