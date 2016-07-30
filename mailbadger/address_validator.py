@@ -8,11 +8,14 @@ TIMEOUT = 999999999
 
 def validate_wrapper(args):
     validator, address, domain = args
-    return (address, validator.validate(address, domain))
+    full_addr = '{}@{}'.format(address, domain)
+    return (full_addr, validator.validate(address, domain))
 
 class AddressValidator:
 
     def __init__(self, validator, num_processes):
+        if num_processes < 1:
+            raise ValueError('Number of processes must be at least 1')
         self._validator = validator
         self._num_processes = num_processes
 
