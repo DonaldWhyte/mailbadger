@@ -1,10 +1,13 @@
-from distutils.core import setup
+from setuptools import setup
+from setuptools import find_packages
 import os
 import mailbadger
 
 currentFileDirectory = os.path.dirname(__file__)
 with open(os.path.join(currentFileDirectory, "README.md"), "r") as f:
     readme = f.read()
+
+print(find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]))
 
 setup(
     name="mailbadger",
@@ -23,7 +26,8 @@ setup(
     ],
     keywords="email detector validator mail server smtp script",
     license="MIT",
-    packages=("mailbadger"),
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     scripts=('mailbadger.py',),
-    data_files=[ (".", ["LICENCE"]) ]
+    data_files=[ (".", ["LICENSE"]) ],
+    test_suite='tests'
 )
