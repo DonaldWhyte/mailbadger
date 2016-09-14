@@ -1,4 +1,4 @@
-TODO: logo
+![mailbadger](content/logo.png)
 
 TODO: what is is
 
