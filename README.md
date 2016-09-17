@@ -1,8 +1,10 @@
 ![mailbadger](content/logo.png)
 
-TODO: what is is
+mailbadger is a script that tries to find the name fo 
 
-**NOTE:** mailbadger is Python 3 only.
+You give mailbadger the full name of the employee you want to contact and the domain of the company's mail server.  mailbadger then outputs email addresses from the company.
+
+**NOTE:** mailbadger is Python 3 only!
 
 ## Installation
 
@@ -21,12 +23,29 @@ python setup.py install
 
 ## Usage
 
-TODO
+```
+python mailbadger.py <firstName> <lastName> <email
+```
+
+Example output:
+
+```
+> python mailbadger.py donald whyte devcorp.com
+dwhyte@devcorp.com
+donaldwhyte3@devcorp.com
+donaldw@devcorp.com
+```
+
+## TODO
 
 ## Running Tests
 
-Run tests by 
+Unit tests can be executed by running:
 
 ```
 python setup.py test
 ```
+
+## Limitations
+
+TODO
